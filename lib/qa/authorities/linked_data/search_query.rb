@@ -44,7 +44,7 @@ module Qa::Authorities
         end
 
         def preds_for_search
-          { required: required_search_preds, optional: optional_search_preds }
+          { required: required_search_preds, optional: optional_search_preds, context: context_search_preds }
         end
 
         def required_search_preds
@@ -61,6 +61,10 @@ module Qa::Authorities
           preds
         end
 
+        def context_search_preds
+          search_config.results_context || {}
+        end
+
         def consolidate_search_results(results)
           consolidated_results = {}
           return consolidated_results if results.nil? || !results.count.positive?
@@ -72,6 +76,12 @@ module Qa::Authorities
             consolidated_hash[:label] = object_value(stmt_hash, consolidated_hash, :label, false)
             consolidated_hash[:altlabel] = object_value(stmt_hash, consolidated_hash, :altlabel, false)
             consolidated_hash[:sort] = object_value(stmt_hash, consolidated_hash, :sort, false)
+
+            # add context
+            context_search_preds.each_key do |k|
+              consolidated_hash[k] = object_value(stmt_hash, consolidated_hash, k, false)
+            end
+
             consolidated_results[uri] = consolidated_hash
           end
           consolidated_results.each do |res|
@@ -79,6 +89,11 @@ module Qa::Authorities
             consolidated_hash[:label] = sort_string_by_language consolidated_hash[:label]
             consolidated_hash[:altlabel] = sort_string_by_language consolidated_hash[:altlabel]
             consolidated_hash[:sort] = sort_string_by_language consolidated_hash[:sort]
+
+            # consolidate context
+            context_search_preds.each_key do |k|
+              consolidated_hash[k] = sort_string_by_language consolidated_hash[k]
+            end
           end
           consolidated_results
         end
@@ -86,9 +101,19 @@ module Qa::Authorities
         def convert_search_to_json(consolidated_results)
           json_results = []
           consolidated_results.each do |uri, h|
-            json_results << { uri: uri, id: h[:id], label: full_label(h[:label], h[:altlabel]), sort: h[:sort] }
+            json_result = { uri: uri, id: h[:id], label: full_label(h[:label], h[:altlabel]), sort: h[:sort] }
+            json_result[:context] = context_json(h) if search_config.supports_context?
+            json_results << json_result
           end
           json_results
+        end
+
+        def context_json(consolidated_results_hash)
+          context_json = {}
+          context_search_preds.each_key do |k|
+            context_json[k] = consolidated_results_hash[k]
+          end
+          context_json
         end
 
         def full_label(label = [], altlabel = [])
