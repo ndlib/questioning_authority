@@ -16,7 +16,7 @@ class Qa::LinkedDataTermsController < ApplicationController
   # @see Qa::Authorities::LinkedData::SearchQuery#search
   def search
     begin
-      terms = @authority.search(query, subauth: subauthority, language: language, replacements: replacement_params)
+      terms = @authority.search(query, subauth: subauthority, language: language, replacements: replacement_params, include_performance_data: performance_data)
     rescue Qa::ServiceUnavailable
       logger.warn "Service Unavailable - Search query #{query} unsuccessful for#{subauth_warn_msg} authority #{vocab_param}"
       head :service_unavailable
@@ -37,7 +37,7 @@ class Qa::LinkedDataTermsController < ApplicationController
   # @see Qa::Authorities::LinkedData::FindTerm#find
   def show
     begin
-      term = @authority.find(id, subauth: subauthority, language: language, replacements: replacement_params)
+      term = @authority.find(id, subauth: subauthority, language: language, replacements: replacement_params, include_performance_data: performance_data)
     rescue Qa::TermNotFound
       logger.warn "Term Not Found - Fetch term #{id} unsuccessful for#{subauth_warn_msg} authority #{vocab_param}"
       head :not_found
@@ -127,6 +127,11 @@ class Qa::LinkedDataTermsController < ApplicationController
 
     def replacement_params
       params.reject { |k, _v| ['q', 'vocab', 'controller', 'action', 'subauthority', 'language', 'id'].include?(k) }
+    end
+
+    def performance_data
+      return true if params[:performance_data] && params[:performance_data].downcase == 'true'
+      false
     end
 
     def subauth_warn_msg
