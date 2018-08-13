@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", ">= 3.2.13", "< 5.0"
   s.add_dependency "faraday"
-  s.add_dependency "nokogiri", "~> 1.6.0"
+  s.add_dependency "nokogiri", "~> 1.8"
   s.add_dependency "activerecord-import"
   s.add_dependency "deprecation"
 
