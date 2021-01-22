@@ -23,7 +23,7 @@ jobs:
       - name: Install proper bundler gem
         run: gem install bundler -v 1.17.3
       - name: Install Ruby gems
-        run: bundle install
+        run: bundle _1.17.3_ install
       - name: Run rake spec tasks
         run: |
           rake engine_cart:clean
