@@ -20,8 +20,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-      - name: Update system gems
-        run: gem update --system
       - name: Install proper bundler gem
         run: gem install bundler -v 1.5.3
       - name: Uninstall previous bundler
