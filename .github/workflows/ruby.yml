@@ -21,9 +21,11 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
       - name: Install proper bundler gem
-        run: gem install bundler -v 1.17.3
+        run: |
+          gem install bundler -v 1.5.3
+          gem uninstall bundler -v 2.22.6
       - name: Install Ruby gems
-        run: bundle _1.17.3_ install
+        run: bundle _1.5.3_ install
       - name: Run rake spec tasks
         run: |
           rake engine_cart:clean
